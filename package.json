@@ -1,0 +1,153 @@
+{
+  "name": "ultimate-project-manager",
+  "displayName": "Ultimate Project Manager",
+  "publisher": "Undisconnected",
+  "description": "Manage projects from a dedicated sidebar with local metadata and images. See your projects when opening Cursor or VSCode.",
+  "version": "0.1.46",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["project manager", "dashboard", "ultimate", "projects", "manager", "sidebar", "tabs", "categories"],
+  "icon": "media/ultimate-project-manager.png",
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "projectDashboard.open",
+        "title": "Project Dashboard: Open Webview",
+        "icon": "$(home)"
+      },
+      {
+        "command": "projectDashboard.addProject",
+        "title": "Project Dashboard: Add Project",
+        "icon": "$(add)"
+      },
+      {
+        "command": "projectDashboard.editProject",
+        "title": "Project Dashboard: Edit Project",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "projectDashboard.createCategory",
+        "title": "Project Dashboard: Create Category",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "projectDashboard.renameCategory",
+        "title": "Project Dashboard: Rename Category",
+        "icon": "$(symbol-namespace)"
+      },
+      {
+        "command": "projectDashboard.deleteCategory",
+        "title": "Project Dashboard: Delete Category",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "projectDashboard.removeProject",
+        "title": "Project Dashboard: Remove Project",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "projectDashboard.openProject",
+        "title": "Project Dashboard: Open Project",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "projectDashboard.revealInFinder",
+        "title": "Project Dashboard: Reveal in Finder",
+        "icon": "$(reveal)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "projectDashboard",
+          "title": "Projects",
+          "icon": "media/projects.svg"
+        }
+      ]
+    },
+    "views": {
+      "projectDashboard": [
+        {
+          "id": "projectDashboard.projectsView",
+          "name": "Project Dashboard",
+          "type": "webview"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "projectDashboard.addProject",
+          "when": "view == projectDashboard.projectsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projectDashboard.open",
+          "when": "view == projectDashboard.projectsView",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "projectDashboard.open"
+        },
+        {
+          "command": "projectDashboard.addProject"
+        },
+        {
+          "command": "projectDashboard.editProject"
+        },
+        {
+          "command": "projectDashboard.createCategory"
+        },
+        {
+          "command": "projectDashboard.renameCategory"
+        },
+        {
+          "command": "projectDashboard.deleteCategory"
+        },
+        {
+          "command": "projectDashboard.removeProject"
+        },
+        {
+          "command": "projectDashboard.openProject"
+        },
+        {
+          "command": "projectDashboard.revealInFinder"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Ultimate Project Manager",
+      "properties": {
+        "projectDashboard.openInNewWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open projects in a new window when selected from Project Dashboard"
+        },
+        "projectDashboard.showDashboardOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open the Project Dashboard webview in the editor area when the window finishes loading"
+        },
+        "projectDashboard.showDashboardOnlyWhenEmpty": {
+          "type": "boolean",
+          "default": true,
+          "description": "When opening the dashboard on startup, only do so if no folder workspace is open (avoids interrupting an active project)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "npx @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^2.22.0"
+  }
+}

@@ -1,0 +1,28 @@
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="warmTL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="45%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#B91C1C"/>
+    </linearGradient>
+    <linearGradient id="warmBR" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="40%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5EEAD4"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <!-- Hex shell + subtle stroke (flat-top hex like the logo) -->
+  <path fill="#0B1220" stroke="#1E293B" stroke-width="0.4" stroke-linejoin="round"
+    d="M12 2l8 4.5v9L12 22l-8-4.5v-9L12 2z"/>
+  <!-- Six wedges from center: warm TL, teal TR, dark teal right, warm BR, navy BL, navy left -->
+  <path fill="url(#warmTL)" d="M12 12L4 6.5L12 2L12 12z"/>
+  <path fill="url(#teal)" d="M12 12L12 2L20 6.5L12 12z"/>
+  <path fill="#134E4A" d="M12 12L20 6.5L20 17.5L12 12z"/>
+  <path fill="url(#warmBR)" d="M12 12L20 17.5L12 22L12 12z"/>
+  <path fill="#15243D" d="M12 12L12 22L4 17.5L12 12z"/>
+  <path fill="#15243D" d="M12 12L4 17.5L4 6.5L12 12z"/>
+</svg>
