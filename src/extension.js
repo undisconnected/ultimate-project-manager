@@ -415,7 +415,200 @@ async function refreshOpenDashboardPanel(store) {
     return;
   }
   const projects = await store.listProjects();
-  dashboardPanelRef.webview.html = getSidebarHtml(dashboardPanelRef.webview, projects, store);
+  dashboardPanelRef.webview.html = getDashboardHtml(dashboardPanelRef.webview, projects);
+}
+
+function getDashboardHtml(webview, projects) {
+  const categories = sortCategories([...new Set(projects.map((project) => getCategoryLabel(project.category)))]);
+  const filterButtonsHtml = [
+    '<button class="filter-chip active" data-filter="__all__" type="button">All</button>',
+    ...categories.map((category) => {
+      const safeCategory = escapeHtml(category);
+      return `<button class="filter-chip" data-filter="${safeCategory}" type="button">${safeCategory}</button>`;
+    }),
+  ].join('');
+
+  const cardsHtml = projects
+    .map((project) => {
+      const safeName = escapeHtml(project.name || 'Untitled Project');
+      const safeDescription = escapeHtml(project.description || '');
+      const safePath = escapeHtml(project.rootPath || '');
+      const safeCategory = escapeHtml(getCategoryLabel(project.category));
+      const safeColor = escapeHtml(project.color || DEFAULT_COLORS[0]);
+      const safeId = escapeHtml(project.id || '');
+
+      return `
+      <article class="project-card" data-root="${safePath}" data-id="${safeId}" data-category="${safeCategory}" title="${safePath}">
+        <div class="card-top">
+          <span class="dot" style="background:${safeColor}"></span>
+          <span class="category-label">${safeCategory}</span>
+        </div>
+        <h3 class="card-title">${safeName}</h3>
+        ${safeDescription ? `<p class="card-description">${safeDescription}</p>` : '<p class="card-description empty-description">No description</p>'}
+      </article>`;
+    })
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+  <title>Project Dashboard</title>
+  <style>
+    body { margin: 0; color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); }
+    .shell { max-width: 980px; margin: 0 auto; padding: 28px 20px 36px; }
+    .top-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+    .title { margin: 0; font-size: 18px; font-weight: 600; }
+    .add { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--vscode-button-border, transparent); border-radius: 8px; padding: 6px 10px; background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); cursor: pointer; }
+    .add:hover { background: var(--vscode-button-secondaryHoverBackground); }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .filter-chip { border: 1px solid var(--vscode-panel-border); border-radius: 999px; padding: 5px 11px; background: transparent; color: var(--vscode-foreground); cursor: pointer; font-size: 12px; }
+    .filter-chip:hover { background: var(--vscode-list-hoverBackground); }
+    .filter-chip.active { background: var(--vscode-button-background); border-color: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .project-card { border: 1px solid var(--vscode-panel-border); border-radius: 12px; padding: 10px 10px 14px; background: var(--vscode-sideBar-background); cursor: pointer; display: grid; align-content: start; gap: 6px; }
+    .project-card:hover { border-color: var(--vscode-focusBorder); transform: translateY(-1px); }
+    .card-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .dot { width: 12px; height: 12px; border-radius: 999px; flex-shrink: 0; }
+    .category-label { font-size: 11px; color: var(--vscode-descriptionForeground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-title { margin: 0; font-size: 14px; line-height: 1.2; }
+    .card-description { margin: 0; font-size: 12px; line-height: 1.25; color: var(--vscode-descriptionForeground); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .empty-description { opacity: 0.7; font-style: italic; }
+    .empty { color: var(--vscode-descriptionForeground); border: 1px dashed var(--vscode-panel-border); border-radius: 10px; padding: 16px; }
+    .no-results { display: none; margin-top: 6px; color: var(--vscode-descriptionForeground); }
+    .menu { position: fixed; z-index: 9999; display: none; min-width: 190px; background: var(--vscode-menu-background, var(--vscode-editorWidget-background)); color: var(--vscode-menu-foreground, var(--vscode-foreground)); border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border)); border-radius: 8px; padding: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+    .menu button { width: 100%; text-align: left; background: transparent; border: 0; color: inherit; padding: 7px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .menu button:hover { background: var(--vscode-list-hoverBackground); }
+    .menu .danger { color: var(--vscode-errorForeground, #f14c4c); }
+    .sep { height: 1px; background: var(--vscode-panel-border); margin: 6px 4px; opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="top-row">
+      <h1 class="title">Projects</h1>
+      <button class="add" type="button" onclick="addProject()">+ Add project</button>
+    </div>
+    ${projects.length ? `
+      <section class="filters" id="filters">
+        ${filterButtonsHtml}
+      </section>
+      <section class="cards" id="cards">
+        ${cardsHtml}
+      </section>
+      <div class="no-results" id="noResults">No projects in this category.</div>
+    ` : '<div class="empty">No projects yet.</div>'}
+  </main>
+
+  <div class="menu" id="menu" role="menu" aria-hidden="true">
+    <button onclick="menuAction('open')">Open</button>
+    <button onclick="menuAction('reveal')">Reveal in Finder</button>
+    <div class="sep"></div>
+    <button onclick="menuAction('edit')">Edit</button>
+    <button class="danger" onclick="menuAction('delete')">Delete</button>
+  </div>
+  <script>
+    const vscode = acquireVsCodeApi();
+    const persistedState = vscode.getState() || { activeFilter: '__all__' };
+    const menu = document.getElementById('menu');
+    const cardsRoot = document.getElementById('cards');
+    const noResults = document.getElementById('noResults');
+    let menuTarget = null;
+    let activeFilter = persistedState.activeFilter || '__all__';
+
+    function addProject() { vscode.postMessage({ command: 'addProject' }); }
+    function openProject(rootPath) { vscode.postMessage({ command: 'openProject', rootPath }); }
+    function removeProject(rootPath) { vscode.postMessage({ command: 'removeProject', rootPath }); }
+    function editProject(id) { vscode.postMessage({ command: 'editProject', id }); }
+    function revealInFinder(rootPath) { vscode.postMessage({ command: 'revealInFinder', rootPath }); }
+    function saveState() { vscode.setState({ activeFilter }); }
+
+    function hideMenu() {
+      if (!menu) return;
+      menu.style.display = 'none';
+      menu.setAttribute('aria-hidden', 'true');
+      menuTarget = null;
+    }
+
+    function showMenu(x, y, target) {
+      if (!menu) return;
+      menuTarget = target;
+      menu.style.display = 'block';
+      menu.setAttribute('aria-hidden', 'false');
+      const padding = 8;
+      const maxX = window.innerWidth - menu.offsetWidth - padding;
+      const maxY = window.innerHeight - menu.offsetHeight - padding;
+      menu.style.left = Math.max(padding, Math.min(x, maxX)) + 'px';
+      menu.style.top = Math.max(padding, Math.min(y, maxY)) + 'px';
+    }
+
+    function menuAction(action) {
+      if (!menuTarget) return;
+      const rootPath = menuTarget.getAttribute('data-root');
+      const id = menuTarget.getAttribute('data-id');
+      hideMenu();
+      if (action === 'open') return openProject(rootPath);
+      if (action === 'reveal') return revealInFinder(rootPath);
+      if (action === 'edit') return editProject(id);
+      if (action === 'delete') return removeProject(rootPath);
+    }
+
+    function findCard(el) {
+      if (!el) return null;
+      if (el.classList && el.classList.contains('project-card')) return el;
+      return el.closest ? el.closest('.project-card') : null;
+    }
+
+    function applyFilters() {
+      if (!cardsRoot) return;
+      let visibleCount = 0;
+      cardsRoot.querySelectorAll('.project-card').forEach((card) => {
+        const category = card.getAttribute('data-category') || '';
+        const visible = activeFilter === '__all__' || category === activeFilter;
+        card.style.display = visible ? '' : 'none';
+        if (visible) visibleCount += 1;
+      });
+      if (noResults) {
+        noResults.style.display = visibleCount ? 'none' : 'block';
+      }
+      document.querySelectorAll('.filter-chip').forEach((chip) => {
+        chip.classList.toggle('active', chip.getAttribute('data-filter') === activeFilter);
+      });
+    }
+
+    document.querySelectorAll('.filter-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        activeFilter = chip.getAttribute('data-filter') || '__all__';
+        saveState();
+        applyFilters();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (menu && menu.style.display === 'block') hideMenu();
+      const card = findCard(e.target);
+      if (!card) return;
+      openProject(card.getAttribute('data-root'));
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+      const card = findCard(e.target);
+      if (!card) return;
+      e.preventDefault();
+      showMenu(e.clientX, e.clientY, card);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideMenu();
+    });
+
+    window.addEventListener('blur', hideMenu);
+    applyFilters();
+  </script>
+</body>
+</html>`;
 }
 
 async function openProjectFolder(rootPath) {
@@ -730,7 +923,7 @@ async function createDashboardPanel(store, provider, context) {
 
   if (dashboardPanelRef) {
     dashboardPanelRef.reveal(vscode.ViewColumn.One);
-    dashboardPanelRef.webview.html = getSidebarHtml(dashboardPanelRef.webview, projects, store);
+    dashboardPanelRef.webview.html = getDashboardHtml(dashboardPanelRef.webview, projects);
     return dashboardPanelRef;
   }
 
@@ -739,7 +932,7 @@ async function createDashboardPanel(store, provider, context) {
     retainContextWhenHidden: true,
   });
   dashboardPanelRef = panel;
-  panel.webview.html = getSidebarHtml(panel.webview, projects, store);
+  panel.webview.html = getDashboardHtml(panel.webview, projects);
 
   panel.onDidDispose(() => {
     dashboardPanelRef = null;

@@ -3,7 +3,7 @@
   "displayName": "Ultimate Project Manager",
   "publisher": "Undisconnected",
   "description": "Manage projects from a dedicated sidebar with local metadata and images. See your projects when opening Cursor or VSCode.",
-  "version": "0.1.46",
+  "version": "0.1.50",
   "engines": {
     "vscode": "^1.80.0"
   },
