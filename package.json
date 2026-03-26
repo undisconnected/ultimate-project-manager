@@ -3,12 +3,16 @@
   "displayName": "Ultimate Project Manager",
   "publisher": "Undisconnected",
   "description": "Manage projects from a dedicated sidebar with local metadata and images. See your projects when opening Cursor or VSCode.",
-  "version": "0.1.50",
+  "version": "0.1.56",
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": ["Other"],
   "keywords": ["project manager", "dashboard", "ultimate", "projects", "manager", "sidebar", "tabs", "categories"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/undisconnected/ultimate-project-manager.git"
+  },
   "icon": "media/ultimate-project-manager.png",
   "main": "./src/extension.js",
   "activationEvents": [
@@ -75,7 +79,7 @@
       "projectDashboard": [
         {
           "id": "projectDashboard.projectsView",
-          "name": "Project Dashboard",
+          "name": "Ultimate Project Manager",
           "type": "webview"
         }
       ]
