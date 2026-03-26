@@ -6,14 +6,18 @@ const crypto = require('crypto');
 const PROJECTS_FILE = 'projects.json';
 const UNCATEGORIZED_LABEL = 'Uncategorized';
 const NAMED_COLORS = [
-  { name: 'Blue', hex: '#3B82F6', dot: '🔵' },
-  { name: 'Orange', hex: '#F59E0B', dot: '🟠' },
-  { name: 'Pink', hex: '#EC4899', dot: '🩷' },
-  { name: 'Green', hex: '#10B981', dot: '🟢' },
-  { name: 'Purple', hex: '#A855F7', dot: '🟣' },
-  { name: 'Red', hex: '#EF4444', dot: '🔴' },
-  { name: 'Teal', hex: '#14B8A6', dot: '🔹' },
-  { name: 'Amber', hex: '#F97316', dot: '🟧' },
+  { name: 'Blue', hex: '#3B82F6' },
+  { name: 'Orange', hex: '#F59E0B' },
+  { name: 'Pink', hex: '#EC4899' },
+  { name: 'Green', hex: '#10B981' },
+  { name: 'Yellow', hex: '#EAB308' },
+  { name: 'Forest Green', hex: '#15803D' },
+  { name: 'Gray', hex: '#6B7280' },
+  { name: 'Light Blue', hex: '#38BDF8' },
+  { name: 'Purple', hex: '#A855F7' },
+  { name: 'Red', hex: '#EF4444' },
+  { name: 'Teal', hex: '#14B8A6' },
+  { name: 'Amber', hex: '#F97316' },
 ];
 const DEFAULT_COLORS = NAMED_COLORS.map((item) => item.hex);
 
@@ -629,7 +633,7 @@ async function revealInFinder(rootPath) {
 
 async function pickColor(currentColor) {
   const items = NAMED_COLORS.map((item) => ({
-    label: `${item.dot} ${item.name}`,
+    label: item.name,
     description: item.hex === currentColor ? `${item.hex} (Current)` : item.hex,
     color: item.hex,
   }));
@@ -637,7 +641,7 @@ async function pickColor(currentColor) {
 
   const selected = await vscode.window.showQuickPick(items, {
     title: 'Project color',
-    placeHolder: 'Choose a color dot for this project',
+    placeHolder: 'Choose a color for this project',
   });
   if (!selected) {
     return undefined;
